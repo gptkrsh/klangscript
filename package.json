@@ -1,0 +1,23 @@
+{
+  "name": "klangscript",
+  "version": "0.0.1",
+  "description": "Just your usual klangscript",
+  "main": "dist/index.js",
+  "types": "types/index.d.ts",
+  "repository": "https://github.com/github:krshkun/klangscript",
+  "author": "Krish Gupta <krshkun@proton.me>",
+  "bin": "bin/klangscript",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "@types/node": "^18.11.17",
+    "tsc": "^2.0.4"
+  },
+  "dependencies": {
+    "chalk": "^5.2.0",
+    "commander": "^9.4.1",
+    "cross-spawn": "^7.0.3",
+    "figlet": "^1.5.2",
+    "typescript": "^4.9.4"
+  }
+}

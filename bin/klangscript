@@ -1,0 +1,84 @@
+#!/usr/bin/env node
+const commander = require('commander');
+const crossSpawn = require('cross-spawn');
+const figlet = require('figlet');
+const fs = require('node:fs');
+const os = require('node:os')
+const klangscript = require('../').default;
+
+// Initialize CLI
+commander
+  .version(require('../package.json').version)
+  .description('A CLI for the klangscript npm package');
+
+// Compile command
+commander
+  .command('compile <input> <output>')
+  .alias('c')
+  .description('Compile a klangscript file to JavaScript')
+  .action((input, output) => {
+    // Read input file
+    fs.readFile(input, 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+        process.exit(1);
+      }
+
+      // Convert klangscript to JavaScript
+      const outputCode = klangscript(data);
+
+      // Write output file
+      fs.writeFile(output, outputCode, (err) => {
+        if (err) {
+          console.error(err);
+          process.exit(1);
+        }
+
+        console.log(`Successfully compiled ${input} to ${output}`);
+      });
+    });
+  });
+
+
+commander
+  .command('dev <input>')
+  .option('-e, --code <code>', 'use code instead of file')
+  .description('watch and run klangscript file')
+  .action(async (input, options) => {
+    let inputText = '';
+    if (options.code) {
+      inputText = () => options.code;
+    } else {
+      inputText = () => fs.readFileSync(input, 'utf8');
+    }
+
+    const cacheDir = os.tmpdir();
+    const outputPath = `${cacheDir}/klangscript.js`;
+
+    const run = (input) => {
+      const outputText = klangscript(inputText());
+      fs.writeFileSync(outputPath, outputText);
+      crossSpawn.sync('node', [outputPath], { stdio: 'inherit' });
+    };
+
+    run();
+
+    if (!options.code) {
+      fs.watchFile(input, () => run());
+    }
+  });
+
+commander
+  .command('help')
+  .description('display documentation')
+  .action(() => {
+    console.log(figlet.textSync('klangscript'));
+    console.log('');
+    console.log('Commands:');
+    console.log('');
+    console.log('  compile <input> <output>  compile klangscript file to JavaScript');
+    console.log('  dev <input>               watch and run klangscript file');
+    console.log('  help                      display documentation');
+  });
+
+commander.parse(process.argv);
